@@ -1,59 +1,259 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Booking Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A simple booking management platform built with Laravel 12, Vue.js 3, and PostgreSQL. Users can create and manage bookings associated with clients, with automatic overlap prevention.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Booking Management**: Create, view, update, and delete bookings
+- **Client Management**: Manage clients associated with bookings
+- **Overlap Prevention**: Prevents users from creating overlapping bookings
+- **Weekly View API**: Retrieve bookings for any calendar week (Monday-Sunday)
+- **Modern UI**: Vue.js 3 frontend with Tailwind CSS styling
+- **Repository Pattern**: Clean architecture with abstracted database layer
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Backend**: Laravel 12 (PHP 8.4)
+- **Frontend**: Vue.js 3 with Vite
+- **Database**: PostgreSQL
+- **Styling**: Tailwind CSS 4
+- **Development**: Laravel Sail (Docker)
+- **Testing**: PHPUnit
 
-## Learning Laravel
+## Requirements
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- Docker Desktop
+- Git
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Installation
 
-## Laravel Sponsors
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/ekpono/booking-platform.git
+   cd booking-platform
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Copy environment file**
+   ```bash
+   cp .env.example .env
+   ```
 
-### Premium Partners
+3. **Start Docker containers**
+   ```bash
+   ./vendor/bin/sail up -d
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+4. **Install PHP dependencies** (if not already installed)
+   ```bash
+   ./vendor/bin/sail composer install
+   ```
 
-## Contributing
+5. **Generate application key**
+   ```bash
+   ./vendor/bin/sail artisan key:generate
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+6. **Run database migrations**
+   ```bash
+   ./vendor/bin/sail artisan migrate
+   ```
 
-## Code of Conduct
+7. **Seed the database** (optional, for demo data)
+   ```bash
+   ./vendor/bin/sail artisan db:seed
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+8. **Install and build frontend assets**
+   ```bash
+   ./vendor/bin/sail npm install
+   ./vendor/bin/sail npm run build
+   ```
 
-## Security Vulnerabilities
+9. **Access the application**
+   - Web UI: http://localhost
+   - API: http://localhost/api
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Running Tests
+
+```bash
+./vendor/bin/sail artisan test
+```
+
+Or run specific test files:
+
+```bash
+# Test booking creation
+./vendor/bin/sail artisan test --filter=BookingCreationTest
+
+# Test overlap prevention
+./vendor/bin/sail artisan test --filter=BookingOverlapTest
+
+# Test weekly API
+./vendor/bin/sail artisan test --filter=WeeklyBookingsApiTest
+```
+
+## API Endpoints
+
+### Bookings
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/bookings` | List all bookings |
+| GET | `/api/bookings?week=2025-08-05` | Get bookings for specific week |
+| POST | `/api/bookings` | Create a new booking |
+| GET | `/api/bookings/{id}` | Get a single booking |
+| PUT | `/api/bookings/{id}` | Update a booking |
+| DELETE | `/api/bookings/{id}` | Delete a booking |
+
+### Clients
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/clients` | List all clients |
+| POST | `/api/clients` | Create a new client |
+| GET | `/api/clients/{id}` | Get a single client |
+| DELETE | `/api/clients/{id}` | Delete a client |
+
+## API Examples
+
+### Create a Booking
+
+```bash
+curl -X POST http://localhost/api/bookings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client_id": 1,
+    "title": "Project Meeting",
+    "description": "Discuss project requirements",
+    "start_time": "2025-08-05 10:00:00",
+    "end_time": "2025-08-05 11:00:00"
+  }'
+```
+
+### Get Weekly Bookings
+
+```bash
+curl http://localhost/api/bookings?week=2025-08-05
+```
+
+### Response Format
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Project Meeting",
+      "description": "Discuss project requirements",
+      "start_time": "2025-08-05T10:00:00+00:00",
+      "end_time": "2025-08-05T11:00:00+00:00",
+      "user": {
+        "id": 1,
+        "name": "Demo User",
+        "email": "demo@example.com"
+      },
+      "client": {
+        "id": 1,
+        "name": "Acme Corporation",
+        "email": "contact@acme.com"
+      },
+      "created_at": "2025-02-18T20:00:00+00:00",
+      "updated_at": "2025-02-18T20:00:00+00:00"
+    }
+  ]
+}
+```
+
+## Business Rules
+
+### Overlap Prevention
+
+A user cannot have overlapping bookings. The system checks for overlaps when:
+
+- Creating a new booking
+- Updating an existing booking
+
+If an overlap is detected, the API returns a 422 response:
+
+```json
+{
+  "message": "Validation failed",
+  "errors": {
+    "overlap": ["The booking overlaps with an existing booking for this user."]
+  }
+}
+```
+
+### Weekly API
+
+The weekly bookings endpoint uses Monday-Sunday week boundaries:
+
+- Pass any date within the desired week
+- Returns all bookings where `start_time` falls within that week
+- Results are ordered by `start_time`
+
+## Project Structure
+
+```
+app/
+├── Exceptions/
+│   └── BookingOverlapException.php
+├── Http/
+│   ├── Controllers/Api/
+│   │   ├── BookingController.php
+│   │   └── ClientController.php
+│   ├── Requests/
+│   │   ├── StoreBookingRequest.php
+│   │   ├── UpdateBookingRequest.php
+│   │   └── StoreClientRequest.php
+│   └── Resources/
+│       ├── BookingResource.php
+│       └── ClientResource.php
+├── Models/
+│   ├── Booking.php
+│   ├── Client.php
+│   └── User.php
+├── Providers/
+│   └── RepositoryServiceProvider.php
+└── Repositories/
+    ├── Contracts/
+    │   ├── RepositoryInterface.php
+    │   ├── BookingRepositoryInterface.php
+    │   └── ClientRepositoryInterface.php
+    └── Eloquent/
+        ├── BaseRepository.php
+        ├── BookingRepository.php
+        └── ClientRepository.php
+```
+
+## Demo Credentials
+
+After running seeders:
+
+- **Email**: demo@example.com
+- **Password**: password
+
+## Development
+
+### Start development server
+
+```bash
+./vendor/bin/sail up -d
+./vendor/bin/sail npm run dev
+```
+
+### Watch for changes
+
+```bash
+./vendor/bin/sail npm run dev
+```
+
+### Run code formatting
+
+```bash
+./vendor/bin/sail vendor/bin/pint
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
