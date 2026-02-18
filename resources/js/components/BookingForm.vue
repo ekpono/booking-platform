@@ -1,22 +1,22 @@
 <template>
     <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="mx-4 w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-xl">
-            <div class="border-b border-slate-200 px-6 py-4">
-                <h3 class="text-lg font-semibold text-slate-900">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">
                     {{ booking ? 'Edit Booking' : 'New Booking' }}
                 </h3>
             </div>
 
-            <form @submit.prevent="saveBooking" class="space-y-4 p-6">
+            <form @submit.prevent="saveBooking" class="p-6 space-y-4">
                 <!-- Client Select -->
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-slate-700">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
                         Client
                     </label>
                     <select
                         v-model="form.client_id"
                         required
-                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#45b2e9] focus:ring-[#45b2e9]"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="">Select a client</option>
                         <option v-for="client in clients" :key="client.id" :value="client.id">
@@ -30,14 +30,14 @@
 
                 <!-- Title -->
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-slate-700">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
                         Title
                     </label>
                     <input
                         v-model="form.title"
                         type="text"
                         required
-                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#45b2e9] focus:ring-[#45b2e9]"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Meeting title"
                     />
                     <p v-if="errors.title" class="mt-1 text-sm text-red-600">
@@ -47,27 +47,27 @@
 
                 <!-- Description -->
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-slate-700">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
                         Description (optional)
                     </label>
                     <textarea
                         v-model="form.description"
                         rows="3"
-                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#45b2e9] focus:ring-[#45b2e9]"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Add any notes..."
                     ></textarea>
                 </div>
 
                 <!-- Start Time -->
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-slate-700">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
                         Start Time
                     </label>
                     <input
                         v-model="form.start_time"
                         type="datetime-local"
                         required
-                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#45b2e9] focus:ring-[#45b2e9]"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
                     <p v-if="errors.start_time" class="mt-1 text-sm text-red-600">
                         {{ errors.start_time[0] }}
@@ -76,14 +76,14 @@
 
                 <!-- End Time -->
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-slate-700">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
                         End Time
                     </label>
                     <input
                         v-model="form.end_time"
                         type="datetime-local"
                         required
-                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#45b2e9] focus:ring-[#45b2e9]"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
                     <p v-if="errors.end_time" class="mt-1 text-sm text-red-600">
                         {{ errors.end_time[0] }}
@@ -91,23 +91,23 @@
                 </div>
 
                 <!-- Overlap Error -->
-                <div v-if="errors.overlap" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div v-if="errors.overlap" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
                     {{ errors.overlap[0] }}
                 </div>
 
                 <!-- Actions -->
-                <div class="flex justify-end gap-3 pt-4">
+                <div class="flex justify-end space-x-3 pt-4">
                     <button
                         type="button"
                         @click="$emit('close')"
-                        class="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         :disabled="saving"
-                        class="rounded-full bg-[#45b2e9] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#3794c0] disabled:opacity-40"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
                         {{ saving ? 'Saving...' : (booking ? 'Update' : 'Create') }}
                     </button>

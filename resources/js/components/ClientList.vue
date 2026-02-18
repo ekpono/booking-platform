@@ -1,35 +1,35 @@
 <template>
     <div class="space-y-6">
         <!-- Header -->
-        <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-semibold text-slate-900">Clients</h2>
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-gray-900">Clients</h2>
             <button
                 @click="showForm = true"
-                class="rounded-full bg-[#45b2e9] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#3794c0]"
+                class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
             >
                 New Client
             </button>
         </div>
 
         <!-- Client Form Modal -->
-        <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-            <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-xl">
-                <div class="border-b border-slate-200 px-6 py-4">
-                    <h3 class="text-lg font-semibold text-slate-900">
+        <div v-if="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">
                         New Client
                     </h3>
                 </div>
 
-                <form @submit.prevent="saveClient" class="space-y-4 p-6">
+                <form @submit.prevent="saveClient" class="p-6 space-y-4">
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-slate-700">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
                             Name
                         </label>
                         <input
                             v-model="form.name"
                             type="text"
                             required
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#45b2e9] focus:ring-[#45b2e9]"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Client name"
                         />
                         <p v-if="errors.name" class="mt-1 text-sm text-red-600">
@@ -38,14 +38,14 @@
                     </div>
 
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-slate-700">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
                             Email
                         </label>
                         <input
                             v-model="form.email"
                             type="email"
                             required
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#45b2e9] focus:ring-[#45b2e9]"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="client@example.com"
                         />
                         <p v-if="errors.email" class="mt-1 text-sm text-red-600">
@@ -53,18 +53,18 @@
                         </p>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-4">
+                    <div class="flex justify-end space-x-3 pt-4">
                         <button
                             type="button"
                             @click="closeForm"
-                            class="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             :disabled="saving"
-                            class="rounded-full bg-[#45b2e9] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#3794c0] disabled:opacity-40"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                         >
                             {{ saving ? 'Saving...' : 'Create' }}
                         </button>
@@ -74,12 +74,12 @@
         </div>
 
         <!-- Clients List -->
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-            <div v-if="loading" class="p-8 text-center text-slate-500">
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div v-if="loading" class="p-8 text-center text-gray-500">
                 Loading clients...
             </div>
 
-            <div v-else-if="clients.length === 0" class="p-8 text-center text-slate-500">
+            <div v-else-if="clients.length === 0" class="p-8 text-center text-gray-500">
                 No clients found. Create your first client to get started.
             </div>
 
@@ -87,19 +87,19 @@
                 <li
                     v-for="client in clients"
                     :key="client.id"
-                    class="flex items-center justify-between p-4 hover:bg-slate-50"
+                    class="p-4 hover:bg-gray-50 flex justify-between items-center"
                 >
                     <div>
-                        <h3 class="text-lg font-semibold text-slate-900">
+                        <h3 class="text-lg font-medium text-gray-900">
                             {{ client.name }}
                         </h3>
-                        <p class="text-sm text-slate-500">
+                        <p class="text-sm text-gray-500">
                             {{ client.email }}
                         </p>
                     </div>
                     <button
                         @click="deleteClient(client.id)"
-                        class="text-sm font-medium text-slate-500 hover:text-slate-900"
+                        class="text-red-600 hover:text-red-800 text-sm"
                     >
                         Delete
                     </button>
@@ -108,7 +108,7 @@
         </div>
 
         <!-- Error Message -->
-        <div v-if="error" class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
             {{ error }}
         </div>
     </div>

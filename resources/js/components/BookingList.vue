@@ -1,34 +1,34 @@
 <template>
     <div class="space-y-6">
         <!-- Header -->
-        <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-semibold text-slate-900">Bookings</h2>
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-gray-900">Bookings</h2>
             <button
                 @click="showForm = true"
-                class="rounded-full bg-[#45b2e9] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#3794c0]"
+                class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
             >
                 New Booking
             </button>
         </div>
 
         <!-- Week Selector -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-4">
-            <div class="flex flex-wrap items-center gap-4">
-                <label class="text-sm font-medium text-slate-700">Select Week:</label>
+        <div class="bg-white shadow rounded-lg p-4">
+            <div class="flex items-center space-x-4">
+                <label class="text-sm font-medium text-gray-700">Select Week:</label>
                 <input
                     type="date"
                     v-model="selectedDate"
                     @change="fetchBookings"
-                    class="rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#45b2e9] focus:ring-[#45b2e9]"
+                    class="border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <button
                     @click="goToCurrentWeek"
-                    class="text-sm font-medium text-[#45b2e9] hover:text-[#2f85b0]"
+                    class="text-sm text-indigo-600 hover:text-indigo-800"
                 >
                     Current Week
                 </button>
             </div>
-            <p class="mt-2 text-sm text-slate-500">
+            <p class="mt-2 text-sm text-gray-500">
                 Showing bookings for: {{ weekRange }}
             </p>
         </div>
@@ -42,12 +42,12 @@
         />
 
         <!-- Bookings List -->
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-            <div v-if="loading" class="p-8 text-center text-slate-500">
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div v-if="loading" class="p-8 text-center text-gray-500">
                 Loading bookings...
             </div>
 
-            <div v-else-if="bookings.length === 0" class="p-8 text-center text-slate-500">
+            <div v-else-if="bookings.length === 0" class="p-8 text-center text-gray-500">
                 No bookings found for this week.
             </div>
 
@@ -55,17 +55,17 @@
                 <li
                     v-for="booking in bookings"
                     :key="booking.id"
-                    class="p-5 hover:bg-slate-50"
+                    class="p-4 hover:bg-gray-50"
                 >
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-slate-900">
+                            <h3 class="text-lg font-medium text-gray-900">
                                 {{ booking.title }}
                             </h3>
-                            <p v-if="booking.description" class="mt-1 text-sm text-slate-600">
+                            <p v-if="booking.description" class="mt-1 text-sm text-gray-600">
                                 {{ booking.description }}
                             </p>
-                            <div class="mt-2 flex flex-wrap items-center gap-x-4 text-sm text-slate-500">
+                            <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500">
                                 <span>
                                     <strong>Client:</strong> {{ booking.client.name }}
                                 </span>
@@ -77,13 +77,13 @@
                         <div class="flex space-x-2">
                             <button
                                 @click="editBooking(booking)"
-                                class="text-sm font-medium text-[#45b2e9] hover:text-[#2f85b0]"
+                                class="text-indigo-600 hover:text-indigo-800 text-sm"
                             >
                                 Edit
                             </button>
                             <button
                                 @click="deleteBooking(booking.id)"
-                                class="text-sm font-medium text-slate-500 hover:text-slate-900"
+                                class="text-red-600 hover:text-red-800 text-sm"
                             >
                                 Delete
                             </button>
@@ -94,7 +94,7 @@
         </div>
 
         <!-- Error Message -->
-        <div v-if="error" class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
             {{ error }}
         </div>
     </div>
