@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\BookingRepositoryInterface;
 use App\Repositories\Contracts\ClientRepositoryInterface;
+use App\Repositories\Eloquent\BookingRepository;
 use App\Repositories\Eloquent\ClientRepository;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,6 +16,7 @@ class RepositoryServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ClientRepositoryInterface::class, ClientRepository::class);
+        $this->app->bind(BookingRepositoryInterface::class, BookingRepository::class);
     }
 
     /**
