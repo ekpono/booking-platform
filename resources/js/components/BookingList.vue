@@ -104,6 +104,7 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import BookingForm from './BookingForm.vue';
+import { ensureCsrfCookie } from '@/utils/csrf';
 
 const bookings = ref([]);
 const loading = ref(false);
@@ -130,6 +131,7 @@ const fetchBookings = async () => {
     error.value = null;
     
     try {
+        await ensureCsrfCookie();
         const response = await axios.get(`/api/bookings?week=${selectedDate.value}`);
         bookings.value = response.data.data;
     } catch (err) {
@@ -185,6 +187,7 @@ const deleteBooking = async (id) => {
     }
     
     try {
+        await ensureCsrfCookie();
         await axios.delete(`/api/bookings/${id}`);
         fetchBookings();
     } catch (err) {

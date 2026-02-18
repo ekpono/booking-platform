@@ -117,6 +117,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
+import { ensureCsrfCookie } from '@/utils/csrf';
 
 const clients = ref([]);
 const loading = ref(false);
@@ -135,6 +136,7 @@ const fetchClients = async () => {
     error.value = null;
     
     try {
+        await ensureCsrfCookie();
         const response = await axios.get('/api/clients');
         clients.value = response.data.data;
     } catch (err) {
@@ -157,6 +159,7 @@ const saveClient = async () => {
     errors.value = {};
     
     try {
+        await ensureCsrfCookie();
         await axios.post('/api/clients', {
             name: form.name,
             email: form.email
@@ -180,6 +183,7 @@ const deleteClient = async (id) => {
     }
     
     try {
+        await ensureCsrfCookie();
         await axios.delete(`/api/clients/${id}`);
         fetchClients();
     } catch (err) {

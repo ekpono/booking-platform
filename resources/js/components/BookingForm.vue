@@ -120,6 +120,7 @@
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue';
 import axios from 'axios';
+import { ensureCsrfCookie } from '@/utils/csrf';
 
 const props = defineProps({
     booking: {
@@ -142,6 +143,14 @@ const form = reactive({
     end_time: ''
 });
 
+const resetForm = () => {
+    form.client_id = '';
+    form.title = '';
+    form.description = '';
+    form.start_time = '';
+    form.end_time = '';
+};
+
 const formatDateTimeLocal = (isoString) => {
     if (!isoString) return '';
     const date = new Date(isoString);
@@ -153,18 +162,25 @@ const formatForApi = (dateTimeLocal) => {
     return dateTimeLocal.replace('T', ' ') + ':00';
 };
 
-watch(() => props.booking, (newBooking) => {
-    if (newBooking) {
-        form.client_id = newBooking.client.id;
-        form.title = newBooking.title;
-        form.description = newBooking.description || '';
-        form.start_time = formatDateTimeLocal(newBooking.start_time);
-        form.end_time = formatDateTimeLocal(newBooking.end_time);
-    }
-}, { immediate: true });
+watch(
+    () => props.booking,
+    (newBooking) => {
+        if (newBooking) {
+            form.client_id = newBooking.client.id;
+            form.title = newBooking.title;
+            form.description = newBooking.description || '';
+            form.start_time = formatDateTimeLocal(newBooking.start_time);
+            form.end_time = formatDateTimeLocal(newBooking.end_time);
+        } else {
+            resetForm();
+        }
+    },
+    { immediate: true },
+);
 
 const fetchClients = async () => {
     try {
+        await ensureCsrfCookie();
         const response = await axios.get('/api/clients');
         clients.value = response.data.data;
     } catch (err) {
@@ -185,10 +201,12 @@ const saveBooking = async () => {
     };
 
     try {
+        await ensureCsrfCookie();
         if (props.booking) {
             await axios.put(`/api/bookings/${props.booking.id}`, data);
         } else {
             await axios.post('/api/bookings', data);
+            resetForm();
         }
         emit('saved');
     } catch (err) {

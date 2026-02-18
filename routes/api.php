@@ -15,8 +15,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Booking routes
-Route::apiResource('bookings', BookingController::class);
+// Protected routes - require authentication
+Route::middleware('auth:sanctum')->group(function () {
+    // Booking routes
+    Route::apiResource('bookings', BookingController::class);
 
-// Client routes
-Route::apiResource('clients', ClientController::class)->only(['index', 'store', 'show', 'destroy']);
+    // Client routes
+    Route::apiResource('clients', ClientController::class)->only(['index', 'store', 'show', 'destroy']);
+});
