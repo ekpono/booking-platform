@@ -3,34 +3,36 @@
 namespace App\Repositories\Contracts;
 
 use App\Models\Booking;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface BookingRepositoryInterface extends RepositoryInterface
 {
     /**
-     * Get all bookings for a specific user.
+     * Get all bookings for a specific user (paginated).
      */
-    public function getByUserId(int $userId): Collection;
+    public function getByUserId(int $userId, int $perPage): LengthAwarePaginator;
 
     /**
-     * Get all bookings for a specific client.
+     * Get all bookings for a specific client (paginated).
      */
-    public function getByClientId(int $clientId): Collection;
+    public function getByClientId(int $clientId, int $perPage): LengthAwarePaginator;
 
     /**
-     * Get bookings for a user within a specific week (Monday-Sunday).
+     * Get bookings for a user within a specific week (Monday-Sunday, paginated).
      *
      * @param int $userId
      * @param string $dateInWeek Any date within the desired week
+     * @param int $perPage
      */
-    public function getByUserForWeek(int $userId, string $dateInWeek): Collection;
+    public function getByUserForWeek(int $userId, string $dateInWeek, int $perPage): LengthAwarePaginator;
 
     /**
-     * Get all bookings within a specific week (Monday-Sunday).
+     * Get all bookings within a specific week (Monday-Sunday, paginated).
      *
      * @param string $dateInWeek Any date within the desired week
+     * @param int $perPage
      */
-    public function getForWeek(string $dateInWeek): Collection;
+    public function getForWeek(string $dateInWeek, int $perPage): LengthAwarePaginator;
 
     /**
      * Check if a user has overlapping bookings for the given time range.

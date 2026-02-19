@@ -21,7 +21,7 @@ class WeeklyBookingsApiTest extends TestCase
         parent::setUp();
 
         $this->user = User::factory()->create();
-        $this->client = Client::factory()->create();
+        $this->client = Client::factory()->create(['user_id' => $this->user->id]);
     }
 
     public function test_can_retrieve_bookings_for_a_specific_week(): void
@@ -156,10 +156,11 @@ class WeeklyBookingsApiTest extends TestCase
             ->assertJson(['data' => []]);
     }
 
-    public function test_weekly_api_returns_bookings_from_all_users(): void
+    public function test_users_can_only_see_their_own_bookings(): void
     {
         $monday = Carbon::parse('2025-08-04');
         $otherUser = User::factory()->create();
+        $otherClient = Client::factory()->create(['user_id' => $otherUser->id]);
 
         // This user's booking
         Booking::factory()
@@ -171,10 +172,10 @@ class WeeklyBookingsApiTest extends TestCase
                 'end_time' => $monday->copy()->setHour(11)->setMinute(0),
             ]);
 
-        // Other user's booking
+        // Other user's booking (should NOT be visible)
         Booking::factory()
             ->forUser($otherUser)
-            ->forClient($this->client)
+            ->forClient($otherClient)
             ->create([
                 'title' => 'Other User Booking',
                 'start_time' => $monday->copy()->setHour(14)->setMinute(0),
@@ -185,11 +186,11 @@ class WeeklyBookingsApiTest extends TestCase
             ->getJson('/api/bookings?week=2025-08-04');
 
         $response->assertStatus(200)
-            ->assertJsonCount(2, 'data');
+            ->assertJsonCount(1, 'data');
 
         $titles = collect($response->json('data'))->pluck('title')->toArray();
         $this->assertContains('My Booking', $titles);
-        $this->assertContains('Other User Booking', $titles);
+        $this->assertNotContains('Other User Booking', $titles);
     }
 
     public function test_weekly_api_includes_user_and_client_data(): void
@@ -267,11 +268,13 @@ class WeeklyBookingsApiTest extends TestCase
         );
     }
 
-    public function test_without_week_parameter_returns_all_bookings(): void
+    public function test_without_week_parameter_returns_only_user_bookings(): void
     {
         $monday = Carbon::parse('2025-08-04');
+        $otherUser = User::factory()->create();
+        $otherClient = Client::factory()->create(['user_id' => $otherUser->id]);
 
-        // Create bookings in different weeks
+        // Create bookings for this user
         Booking::factory()
             ->forUser($this->user)
             ->forClient($this->client)
@@ -290,11 +293,26 @@ class WeeklyBookingsApiTest extends TestCase
                 'end_time' => $monday->copy()->addWeek()->setHour(11)->setMinute(0),
             ]);
 
+        // Create booking for other user (should not be visible)
+        Booking::factory()
+            ->forUser($otherUser)
+            ->forClient($otherClient)
+            ->create([
+                'title' => 'Other User Booking',
+                'start_time' => $monday->copy()->addWeeks(2)->setHour(10)->setMinute(0),
+                'end_time' => $monday->copy()->addWeeks(2)->setHour(11)->setMinute(0),
+            ]);
+
         // Without week parameter
         $response = $this->actingAs($this->user)
             ->getJson('/api/bookings');
 
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data');
+
+        $titles = collect($response->json('data'))->pluck('title')->toArray();
+        $this->assertContains('This Week', $titles);
+        $this->assertContains('Next Week', $titles);
+        $this->assertNotContains('Other User Booking', $titles);
     }
 }

@@ -18,7 +18,7 @@ import { Head, Link } from '@inertiajs/vue3';
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <!-- Bookings Card -->
                     <Link
-                        :href="route('bookings.index')"
+                        :href="route('bookings.page')"
                         class="block overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-md"
                     >
                         <div class="p-6">
@@ -40,7 +40,7 @@ import { Head, Link } from '@inertiajs/vue3';
 
                     <!-- Clients Card -->
                     <Link
-                        :href="route('clients.index')"
+                        :href="route('clients.page')"
                         class="block overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-md"
                     >
                         <div class="p-6">

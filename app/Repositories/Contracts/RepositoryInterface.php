@@ -2,15 +2,15 @@
 
 namespace App\Repositories\Contracts;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface RepositoryInterface
 {
     /**
-     * Get all records.
+     * Get all records (paginated).
      */
-    public function all(): Collection;
+    public function all(int $perPage): LengthAwarePaginator;
 
     /**
      * Find a record by ID.

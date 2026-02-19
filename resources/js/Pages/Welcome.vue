@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 
 defineProps({
     canLogin: Boolean,
@@ -50,13 +51,7 @@ const steps = [
         <div class="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10">
             <header class="flex flex-wrap items-center justify-between border-b border-slate-200 pb-6">
                 <div class="flex items-center gap-4">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#45b2e9] text-lg font-semibold text-[#45b2e9]">
-                        BP
-                    </div>
-                    <div>
-                        <p class="text-sm font-semibold tracking-[0.3em] text-[#45b2e9]">Booking Platform</p>
-                        <p class="text-sm text-slate-600">Simple scheduling for modern agencies</p>
-                    </div>
+                    <ApplicationLogo />
                 </div>
 
                 <nav v-if="canLogin" class="flex items-center gap-3 text-sm font-medium">
@@ -78,7 +73,7 @@ const steps = [
                         <Link
                             v-if="canRegister"
                             :href="route('register')"
-                            class="rounded-full bg-[#45b2e9] px-5 py-2 text-white hover:bg-[#2f85b0]"
+                            class="rounded-full bg-[#45b2e9] px-5 py-2 text-white hover:text-white hover:opacity-50"
                         >
                             Create account
                         </Link>
@@ -89,7 +84,6 @@ const steps = [
             <main class="grid flex-1 gap-12 py-12 lg:grid-cols-[1.4fr_1fr]">
                 <section class="space-y-8">
                     <div class="space-y-4">
-                        <p class="text-sm font-semibold uppercase tracking-[0.4em] text-[#45b2e9]">Built on Laravel 12 + Vue 3</p>
                         <h1 class="text-4xl font-semibold leading-tight">
                             Align bookings, clients, and calendars without juggling spreadsheets.
                         </h1>
@@ -106,7 +100,7 @@ const steps = [
                             Open the workspace
                         </Link>
                         <Link
-                            :href="route('bookings.index')"
+                            :href="route('bookings.page')"
                             class="rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
                         >
                             Review features
@@ -161,7 +155,7 @@ const steps = [
             </section>
 
             <footer class="mt-12 border-t border-slate-200 pt-6 text-sm text-slate-500">
-                Laravel v{{ laravelVersion }} · PHP v{{ phpVersion }} · Crafted with #45b2e9 &amp; white
+                &copy; {{ new Date().getFullYear() }} Booking Platform. All rights reserved.
             </footer>
         </div>
     </div>

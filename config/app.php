@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Pagination Limit
+    |--------------------------------------------------------------------------
+    |
+    | This value sets the default number of items per page for paginated
+    | API responses. You can override this value in your .env file.
+    |
+    */
+
+    'pagination_limit' => (int) env('PAGINATION_LIMIT', 12),
+
 ];

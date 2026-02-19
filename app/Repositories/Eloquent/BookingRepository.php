@@ -5,7 +5,7 @@ namespace App\Repositories\Eloquent;
 use App\Models\Booking;
 use App\Repositories\Contracts\BookingRepositoryInterface;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class BookingRepository extends BaseRepository implements BookingRepositoryInterface
 {
@@ -15,33 +15,33 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Get all bookings for a specific user.
+     * Get all bookings for a specific user (paginated).
      */
-    public function getByUserId(int $userId): Collection
+    public function getByUserId(int $userId, int $perPage = 15): LengthAwarePaginator
     {
         return $this->model
             ->where('user_id', $userId)
             ->with(['client', 'user'])
             ->orderBy('start_time')
-            ->get();
+            ->paginate($perPage);
     }
 
     /**
-     * Get all bookings for a specific client.
+     * Get all bookings for a specific client (paginated).
      */
-    public function getByClientId(int $clientId): Collection
+    public function getByClientId(int $clientId, int $perPage = 15): LengthAwarePaginator
     {
         return $this->model
             ->where('client_id', $clientId)
             ->with(['client', 'user'])
             ->orderBy('start_time')
-            ->get();
+            ->paginate($perPage);
     }
 
     /**
-     * Get bookings for a user within a specific week (Monday-Sunday).
+     * Get bookings for a user within a specific week (Monday-Sunday, paginated).
      */
-    public function getByUserForWeek(int $userId, string $dateInWeek): Collection
+    public function getByUserForWeek(int $userId, string $dateInWeek, int $perPage = 15): LengthAwarePaginator
     {
         [$weekStart, $weekEnd] = $this->getWeekBoundaries($dateInWeek);
 
@@ -51,13 +51,13 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
             ->where('start_time', '<', $weekEnd)
             ->with(['client', 'user'])
             ->orderBy('start_time')
-            ->get();
+            ->paginate($perPage);
     }
 
     /**
-     * Get all bookings within a specific week (Monday-Sunday).
+     * Get all bookings within a specific week (Monday-Sunday, paginated).
      */
-    public function getForWeek(string $dateInWeek): Collection
+    public function getForWeek(string $dateInWeek, int $perPage = 15): LengthAwarePaginator
     {
         [$weekStart, $weekEnd] = $this->getWeekBoundaries($dateInWeek);
 
@@ -66,7 +66,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
             ->where('start_time', '<', $weekEnd)
             ->with(['client', 'user'])
             ->orderBy('start_time')
-            ->get();
+            ->paginate($perPage);
     }
 
     /**

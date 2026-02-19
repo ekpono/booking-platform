@@ -4,7 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Client;
 use App\Repositories\Contracts\ClientRepositoryInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ClientRepository extends BaseRepository implements ClientRepositoryInterface
 {
@@ -22,10 +22,31 @@ class ClientRepository extends BaseRepository implements ClientRepositoryInterfa
     }
 
     /**
-     * Get clients with their bookings.
+     * Get clients with their bookings (paginated).
      */
-    public function getWithBookings(): Collection
+    public function getWithBookings(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->model->with('bookings')->get();
+        return $this->model->with('bookings')->paginate($perPage);
+    }
+
+    /**
+     * Get clients for a specific user (paginated).
+     */
+    public function getByUserId(int $userId, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->paginate($perPage);
+    }
+
+    /**
+     * Get clients with bookings for a specific user (paginated).
+     */
+    public function getWithBookingsByUserId(int $userId, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->with('bookings')
+            ->paginate($perPage);
     }
 }

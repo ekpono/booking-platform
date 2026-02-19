@@ -83,28 +83,66 @@
                 No clients found. Create your first client to get started.
             </div>
 
-            <ul v-else class="divide-y divide-gray-200">
-                <li
-                    v-for="client in clients"
-                    :key="client.id"
-                    class="flex items-center justify-between p-4 hover:bg-slate-50"
-                >
-                    <div>
-                        <h3 class="text-lg font-semibold text-slate-900">
-                            {{ client.name }}
-                        </h3>
-                        <p class="text-sm text-slate-500">
-                            {{ client.email }}
-                        </p>
-                    </div>
-                    <button
-                        @click="deleteClient(client.id)"
-                        class="text-sm font-medium text-slate-500 hover:text-slate-900"
+            <template v-else>
+                <ul class="divide-y divide-gray-200">
+                    <li
+                        v-for="client in clients"
+                        :key="client.id"
+                        class="flex items-center justify-between p-4 hover:bg-slate-50"
                     >
-                        Delete
-                    </button>
-                </li>
-            </ul>
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-900">
+                                {{ client.name }}
+                            </h3>
+                            <p class="text-sm text-slate-500">
+                                {{ client.email }}
+                            </p>
+                        </div>
+                        <button
+                            @click="deleteClient(client.id)"
+                            class="text-sm font-medium text-slate-500 hover:text-slate-900"
+                        >
+                            Delete
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Pagination -->
+                <div class="border-t border-slate-200 px-4 py-3 flex items-center justify-between">
+                    <div class="text-sm text-slate-700">
+                        Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} results
+                    </div>
+                    <div class="flex gap-1">
+                        <button
+                            @click="goToPage(pagination.current_page - 1)"
+                            :disabled="pagination.current_page === 1"
+                            class="px-3 py-1 rounded-md border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Previous
+                        </button>
+                        <button
+                            v-for="page in visiblePages"
+                            :key="page"
+                            @click="goToPage(page)"
+                            :class="[
+                                'px-3 py-1 rounded-md border text-sm font-medium',
+                                page === pagination.current_page
+                                    ? 'bg-[#45b2e9] text-white border-[#45b2e9]'
+                                    : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                            ]"
+                        >
+                            {{ page }}
+                        </button>
+                        <button
+                            @click="goToPage(pagination.current_page + 1)"
+                            :disabled="pagination.current_page === pagination.last_page"
+                            class="px-3 py-1 rounded-md border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </template>
         </div>
 
         <!-- Error Message -->
@@ -115,7 +153,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { ensureCsrfCookie } from '@/utils/csrf';
 
@@ -125,25 +163,66 @@ const error = ref(null);
 const showForm = ref(false);
 const saving = ref(false);
 const errors = ref({});
+const currentPage = ref(1);
+const perPage = ref(12);
+const pagination = ref({
+    current_page: 1,
+    last_page: 1,
+    from: 0,
+    to: 0,
+    total: 0,
+    per_page: 12
+});
 
 const form = reactive({
     name: '',
     email: ''
 });
 
-const fetchClients = async () => {
+const visiblePages = computed(() => {
+    const pages = [];
+    const start = Math.max(1, pagination.value.current_page - 2);
+    const end = Math.min(pagination.value.last_page, pagination.value.current_page + 2);
+    
+    for (let i = start; i <= end; i++) {
+        pages.push(i);
+    }
+    return pages;
+});
+
+const fetchClients = async (page = 1) => {
     loading.value = true;
     error.value = null;
+    currentPage.value = page;
     
     try {
         await ensureCsrfCookie();
-        const response = await axios.get('/api/clients');
+        const response = await axios.get(`/api/clients?page=${page}&per_page=${perPage.value}`);
         clients.value = response.data.data;
+        
+        // Update pagination info
+        if (response.data.meta) {
+            pagination.value = {
+                current_page: response.data.meta.current_page,
+                last_page: response.data.meta.last_page,
+                from: response.data.meta.from,
+                to: response.data.meta.to,
+                total: response.data.meta.total,
+                per_page: response.data.meta.per_page
+            };
+            perPage.value = response.data.meta.per_page;
+        }
     } catch (err) {
         error.value = 'Failed to load clients. Please try again.';
         console.error('Error fetching clients:', err);
     } finally {
         loading.value = false;
+    }
+};
+
+const goToPage = (page) => {
+    if (page >= 1 && page <= pagination.value.last_page) {
+        fetchClients(page);
     }
 };
 
@@ -165,7 +244,7 @@ const saveClient = async () => {
             email: form.email
         });
         closeForm();
-        fetchClients();
+        fetchClients(currentPage.value);
     } catch (err) {
         if (err.response?.status === 422) {
             errors.value = err.response.data.errors || {};
@@ -185,7 +264,7 @@ const deleteClient = async (id) => {
     try {
         await ensureCsrfCookie();
         await axios.delete(`/api/clients/${id}`);
-        fetchClients();
+        fetchClients(currentPage.value);
     } catch (err) {
         error.value = 'Failed to delete client. Please try again.';
         console.error('Error deleting client:', err);
@@ -193,6 +272,6 @@ const deleteClient = async (id) => {
 };
 
 onMounted(() => {
-    fetchClients();
+    fetchClients(1);
 });
 </script>

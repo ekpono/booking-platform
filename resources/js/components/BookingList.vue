@@ -51,46 +51,84 @@
                 No bookings found for this week.
             </div>
 
-            <ul v-else class="divide-y divide-gray-200">
-                <li
-                    v-for="booking in bookings"
-                    :key="booking.id"
-                    class="p-5 hover:bg-slate-50"
-                >
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-slate-900">
-                                {{ booking.title }}
-                            </h3>
-                            <p v-if="booking.description" class="mt-1 text-sm text-slate-600">
-                                {{ booking.description }}
-                            </p>
-                            <div class="mt-2 flex flex-wrap items-center gap-x-4 text-sm text-slate-500">
-                                <span>
-                                    <strong>Client:</strong> {{ booking.client.name }}
-                                </span>
-                                <span>
-                                    <strong>Time:</strong> {{ formatDateTime(booking.start_time) }} - {{ formatTime(booking.end_time) }}
-                                </span>
+            <template v-else>
+                <ul class="divide-y divide-gray-200">
+                    <li
+                        v-for="booking in bookings"
+                        :key="booking.id"
+                        class="p-5 hover:bg-slate-50"
+                    >
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-slate-900">
+                                    {{ booking.title }}
+                                </h3>
+                                <p v-if="booking.description" class="mt-1 text-sm text-slate-600">
+                                    {{ booking.description }}
+                                </p>
+                                <div class="mt-2 flex flex-wrap items-center gap-x-4 text-sm text-slate-500">
+                                    <span>
+                                        <strong>Client:</strong> {{ booking.client.name }}
+                                    </span>
+                                    <span>
+                                        <strong>Time:</strong> {{ formatDateTime(booking.start_time) }} - {{ formatTime(booking.end_time) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button
+                                    @click="editBooking(booking)"
+                                    class="text-sm font-medium text-[#45b2e9] hover:text-[#2f85b0]"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    @click="deleteBooking(booking.id)"
+                                    class="text-sm font-medium text-slate-500 hover:text-slate-900"
+                                >
+                                    Delete
+                                </button>
                             </div>
                         </div>
-                        <div class="flex space-x-2">
-                            <button
-                                @click="editBooking(booking)"
-                                class="text-sm font-medium text-[#45b2e9] hover:text-[#2f85b0]"
-                            >
-                                Edit
-                            </button>
-                            <button
-                                @click="deleteBooking(booking.id)"
-                                class="text-sm font-medium text-slate-500 hover:text-slate-900"
-                            >
-                                Delete
-                            </button>
-                        </div>
+                    </li>
+                </ul>
+
+                <!-- Pagination -->
+                <div class="border-t border-slate-200 px-4 py-3 flex items-center justify-between">
+                    <div class="text-sm text-slate-700">
+                        Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} results
                     </div>
-                </li>
-            </ul>
+                    <div class="flex gap-1">
+                        <button
+                            @click="goToPage(pagination.current_page - 1)"
+                            :disabled="pagination.current_page === 1"
+                            class="px-3 py-1 rounded-md border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Previous
+                        </button>
+                        <button
+                            v-for="page in visiblePages"
+                            :key="page"
+                            @click="goToPage(page)"
+                            :class="[
+                                'px-3 py-1 rounded-md border text-sm font-medium',
+                                page === pagination.current_page
+                                    ? 'bg-[#45b2e9] text-white border-[#45b2e9]'
+                                    : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                            ]"
+                        >
+                            {{ page }}
+                        </button>
+                        <button
+                            @click="goToPage(pagination.current_page + 1)"
+                            :disabled="pagination.current_page === pagination.last_page"
+                            class="px-3 py-1 rounded-md border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </template>
         </div>
 
         <!-- Error Message -->
@@ -112,6 +150,16 @@ const error = ref(null);
 const showForm = ref(false);
 const editingBooking = ref(null);
 const selectedDate = ref(new Date().toISOString().split('T')[0]);
+const currentPage = ref(1);
+const perPage = ref(12); // Will be updated from API response
+const pagination = ref({
+    current_page: 1,
+    last_page: 1,
+    from: 0,
+    to: 0,
+    total: 0,
+    per_page: 12
+});
 
 const weekRange = computed(() => {
     const date = new Date(selectedDate.value);
@@ -126,14 +174,40 @@ const weekRange = computed(() => {
     return `${monday.toLocaleDateString('en-US', options)} - ${sunday.toLocaleDateString('en-US', options)}, ${monday.getFullYear()}`;
 });
 
-const fetchBookings = async () => {
+const visiblePages = computed(() => {
+    const pages = [];
+    const start = Math.max(1, pagination.value.current_page - 2);
+    const end = Math.min(pagination.value.last_page, pagination.value.current_page + 2);
+    
+    for (let i = start; i <= end; i++) {
+        pages.push(i);
+    }
+    return pages;
+});
+
+const fetchBookings = async (page = 1) => {
     loading.value = true;
     error.value = null;
+    currentPage.value = page;
     
     try {
         await ensureCsrfCookie();
-        const response = await axios.get(`/api/bookings?week=${selectedDate.value}`);
+        const response = await axios.get(`/api/bookings?week=${selectedDate.value}&page=${page}&per_page=${perPage.value}`);
         bookings.value = response.data.data;
+        
+        // Update pagination info
+        if (response.data.meta) {
+            pagination.value = {
+                current_page: response.data.meta.current_page,
+                last_page: response.data.meta.last_page,
+                from: response.data.meta.from,
+                to: response.data.meta.to,
+                total: response.data.meta.total,
+                per_page: response.data.meta.per_page
+            };
+            // Update perPage from response for future requests
+            perPage.value = response.data.meta.per_page;
+        }
     } catch (err) {
         error.value = 'Failed to load bookings. Please try again.';
         console.error('Error fetching bookings:', err);
@@ -142,9 +216,16 @@ const fetchBookings = async () => {
     }
 };
 
+const goToPage = (page) => {
+    if (page >= 1 && page <= pagination.value.last_page) {
+        fetchBookings(page);
+    }
+};
+
 const goToCurrentWeek = () => {
     selectedDate.value = new Date().toISOString().split('T')[0];
-    fetchBookings();
+    currentPage.value = 1;
+    fetchBookings(1);
 };
 
 const formatDateTime = (dateString) => {
@@ -178,7 +259,7 @@ const closeForm = () => {
 
 const onBookingSaved = () => {
     closeForm();
-    fetchBookings();
+    fetchBookings(currentPage.value);
 };
 
 const deleteBooking = async (id) => {
@@ -189,7 +270,7 @@ const deleteBooking = async (id) => {
     try {
         await ensureCsrfCookie();
         await axios.delete(`/api/bookings/${id}`);
-        fetchBookings();
+        fetchBookings(currentPage.value);
     } catch (err) {
         error.value = 'Failed to delete booking. Please try again.';
         console.error('Error deleting booking:', err);
@@ -197,6 +278,6 @@ const deleteBooking = async (id) => {
 };
 
 onMounted(() => {
-    fetchBookings();
+    fetchBookings(1);
 });
 </script>

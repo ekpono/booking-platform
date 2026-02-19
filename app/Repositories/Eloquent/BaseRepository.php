@@ -3,8 +3,8 @@
 namespace App\Repositories\Eloquent;
 
 use App\Repositories\Contracts\RepositoryInterface;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 abstract class BaseRepository implements RepositoryInterface
 {
@@ -13,11 +13,11 @@ abstract class BaseRepository implements RepositoryInterface
     ) {}
 
     /**
-     * Get all records.
+     * Get all records (paginated).
      */
-    public function all(): Collection
+    public function all(int $perPage): LengthAwarePaginator
     {
-        return $this->model->all();
+        return $this->model->paginate($perPage);
     }
 
     /**

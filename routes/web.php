@@ -26,12 +26,12 @@ Route::middleware('auth')->group(function () {
     // Bookings page
     Route::get('/bookings', function () {
         return Inertia::render('Bookings/Index');
-    })->name('bookings.index');
+    })->name('bookings.page');
     
     // Clients page
     Route::get('/clients', function () {
         return Inertia::render('Clients/Index');
-    })->name('clients.index');
+    })->name('clients.page');
 });
 
 require __DIR__.'/auth.php';

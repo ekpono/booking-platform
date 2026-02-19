@@ -23,7 +23,7 @@ class StoreClientRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:clients,email'],
+            'email' => ['required', 'email', 'unique:clients,email,NULL,id,user_id,' . auth()->id()],
         ];
     }
 

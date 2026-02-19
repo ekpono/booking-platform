@@ -19,7 +19,7 @@ class BookingCreationTest extends TestCase
         parent::setUp();
 
         $this->user = User::factory()->create();
-        $this->client = Client::factory()->create();
+        $this->client = Client::factory()->create(['user_id' => $this->user->id]);
     }
 
     public function test_can_create_a_booking_successfully(): void

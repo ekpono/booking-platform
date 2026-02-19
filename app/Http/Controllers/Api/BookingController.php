@@ -8,9 +8,11 @@ use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Repositories\Contracts\BookingRepositoryInterface;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Symfony\Component\HttpFoundation\Response;
 
 class BookingController extends Controller
 {
@@ -19,21 +21,27 @@ class BookingController extends Controller
     ) {}
 
     /**
-     * Display a listing of bookings.
+     * Display a listing of bookings for the authenticated user.
      */
     public function index(Request $request): AnonymousResourceCollection
     {
+        $perPage = $request->integer('per_page', config('app.pagination_limit', 12));
+
         // If week parameter is provided, return bookings for that week
         if ($request->has('week')) {
-            $bookings = $this->bookingRepository->getForWeek($request->get('week'));
+            $bookings = $this->bookingRepository->getByUserForWeek(
+                auth()->id(),
+                $request->get('week'),
+                $perPage
+            );
 
             return BookingResource::collection($bookings);
         }
 
-        // Otherwise return all bookings
-        $bookings = $this->bookingRepository->all();
+        // Otherwise return all bookings for the authenticated user
+        $bookings = $this->bookingRepository->getByUserId(auth()->id(), $perPage);
 
-        return BookingResource::collection($bookings->load(['user', 'client']));
+        return BookingResource::collection($bookings);
     }
 
     /**
@@ -43,40 +51,55 @@ class BookingController extends Controller
     {
         $data = $request->validated();
 
-        // Use the authenticated user (for demo, we'll use user_id = 1 if not authenticated)
-        $data['user_id'] = auth()->id() ?? 1;
+        $data['user_id'] = auth()->id();
 
         try {
             $booking = $this->bookingRepository->createWithOverlapCheck($data);
 
             return (new BookingResource($booking->load(['user', 'client'])))
                 ->response()
-                ->setStatusCode(201);
+                ->setStatusCode(Response::HTTP_CREATED);
         } catch (BookingOverlapException $e) {
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => [
                     'overlap' => [$e->getMessage()],
                 ],
-            ], 422);
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
     /**
      * Display the specified booking.
+     *
+     * @throws AuthorizationException
      */
     public function show(int $id): BookingResource
     {
         $booking = $this->bookingRepository->findOrFail($id);
+
+        // Check if the booking belongs to the authenticated user
+        if ($booking->user_id !== auth()->id()) {
+            throw new AuthorizationException('You are not authorized to view this booking.');
+        }
 
         return new BookingResource($booking->load(['user', 'client']));
     }
 
     /**
      * Update the specified booking.
+     *
+     * @throws AuthorizationException
      */
     public function update(UpdateBookingRequest $request, int $id): JsonResponse
     {
+        $booking = $this->bookingRepository->findOrFail($id);
+
+        // Check if the booking belongs to the authenticated user
+        if ($booking->user_id !== auth()->id()) {
+            throw new AuthorizationException('You are not authorized to update this booking.');
+        }
+
         $data = $request->validated();
 
         try {
@@ -84,24 +107,33 @@ class BookingController extends Controller
 
             return (new BookingResource($booking->load(['user', 'client'])))
                 ->response()
-                ->setStatusCode(200);
+                ->setStatusCode(Response::HTTP_OK);
         } catch (BookingOverlapException $e) {
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => [
                     'overlap' => [$e->getMessage()],
                 ],
-            ], 422);
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
     /**
      * Remove the specified booking.
+     *
+     * @throws AuthorizationException
      */
     public function destroy(int $id): JsonResponse
     {
+        $booking = $this->bookingRepository->findOrFail($id);
+
+        // Check if the booking belongs to the authenticated user
+        if ($booking->user_id !== auth()->id()) {
+            throw new AuthorizationException('You are not authorized to delete this booking.');
+        }
+
         $this->bookingRepository->delete($id);
 
-        return response()->json(null, 204);
+        return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }

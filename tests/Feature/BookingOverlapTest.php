@@ -20,7 +20,7 @@ class BookingOverlapTest extends TestCase
         parent::setUp();
 
         $this->user = User::factory()->create();
-        $this->client = Client::factory()->create();
+        $this->client = Client::factory()->create(['user_id' => $this->user->id]);
     }
 
     public function test_cannot_create_booking_that_overlaps_with_existing_booking(): void
