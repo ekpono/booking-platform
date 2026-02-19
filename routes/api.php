@@ -15,6 +15,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// API root endpoint
+Route::get('/', function () {
+    return response()->json([
+        'name' => 'Booking Platform API',
+        'version' => '1.0.0',
+        'endpoints' => [
+            'bookings' => '/api/bookings',
+            'clients' => '/api/clients',
+        ],
+    ]);
+});
+
 // Protected routes - require authentication
 Route::middleware('auth:sanctum')->group(function () {
     // Booking routes
