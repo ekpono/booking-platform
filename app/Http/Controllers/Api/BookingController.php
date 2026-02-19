@@ -8,7 +8,6 @@ use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Repositories\Contracts\BookingRepositoryInterface;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -71,34 +70,24 @@ class BookingController extends Controller
 
     /**
      * Display the specified booking.
-     *
-     * @throws AuthorizationException
      */
     public function show(int $id): BookingResource
     {
         $booking = $this->bookingRepository->findOrFail($id);
 
-        // Check if the booking belongs to the authenticated user
-        if ($booking->user_id !== auth()->id()) {
-            throw new AuthorizationException('You are not authorized to view this booking.');
-        }
+        $this->authorize('view', $booking);
 
         return new BookingResource($booking->load(['user', 'client']));
     }
 
     /**
      * Update the specified booking.
-     *
-     * @throws AuthorizationException
      */
     public function update(UpdateBookingRequest $request, int $id): JsonResponse
     {
         $booking = $this->bookingRepository->findOrFail($id);
 
-        // Check if the booking belongs to the authenticated user
-        if ($booking->user_id !== auth()->id()) {
-            throw new AuthorizationException('You are not authorized to update this booking.');
-        }
+        $this->authorize('update', $booking);
 
         $data = $request->validated();
 
@@ -120,17 +109,12 @@ class BookingController extends Controller
 
     /**
      * Remove the specified booking.
-     *
-     * @throws AuthorizationException
      */
     public function destroy(int $id): JsonResponse
     {
         $booking = $this->bookingRepository->findOrFail($id);
 
-        // Check if the booking belongs to the authenticated user
-        if ($booking->user_id !== auth()->id()) {
-            throw new AuthorizationException('You are not authorized to delete this booking.');
-        }
+        $this->authorize('delete', $booking);
 
         $this->bookingRepository->delete($id);
 

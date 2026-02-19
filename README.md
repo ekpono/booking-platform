@@ -2,6 +2,14 @@
 
 A simple booking management platform built with Laravel 12, Vue.js 3, and PostgreSQL. Users can create and manage bookings associated with clients, with automatic overlap prevention.
 
+## Screenshots
+
+### Bookings Page
+![Bookings Page](booking-page.png)
+
+### Clients Page
+![Clients Page](client-page.png)
+
 ## Features
 
 - **Booking Management**: Create, view, update, and delete bookings
@@ -213,6 +221,8 @@ app/
 │   ├── Booking.php
 │   ├── Client.php
 │   └── User.php
+├── Policies/
+│   └── BookingPolicy.php
 ├── Providers/
 │   └── RepositoryServiceProvider.php
 └── Repositories/
